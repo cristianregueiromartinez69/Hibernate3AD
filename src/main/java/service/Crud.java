@@ -6,6 +6,7 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import models.Pokedex;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Crud {
@@ -45,6 +46,49 @@ public class Crud {
             if(tx.isActive()){
                 tx.rollback();
             }
+        }
+    }
+
+    public void updatePokemons(int id, String newNombre, BigDecimal newPeso, String newMisc){
+        EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("default");
+        EntityManager em = managerFactory.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try(managerFactory; em){
+            tx.begin();
+            Pokedex pokedex = em.find(Pokedex.class, id);
+
+            if(pokedex != null){
+                pokedex.setNome(newNombre);
+                pokedex.setPeso(newPeso);
+                pokedex.setMisc(newMisc);
+            }
+
+            tx.commit();
+        }finally {
+            if(tx.isActive()){
+                tx.rollback();
+            }
+        }
+    }
+
+    public void deletePokedex(){
+        EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("default");
+        EntityManager em = managerFactory.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try (managerFactory; em) {
+            tx.begin();
+            int deletedCount = em.createQuery("DELETE FROM Pokedex").executeUpdate();
+
+            tx.commit();
+            if (deletedCount > 0) {
+                System.out.println("Se han eliminado los pokemons de la pokedex");
+            }
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            System.out.println("Error al eliminar los registros");
         }
     }
 }
